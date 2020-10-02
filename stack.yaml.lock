@@ -3,7 +3,18 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    name: scrabble-oracle
+    version: 0.1.0.0
+    git: https://github.com/jzwood/ScrabbleOracle.git
+    pantry-tree:
+      size: 2258
+      sha256: 957676fcb3e2b8d979d0f54c68930e25bc9eb96bed902fd9672a7587ee5882e6
+    commit: 0b7b4228763a3c6edc76f27f6abeba5ae8017527
+  original:
+    git: https://github.com/jzwood/ScrabbleOracle.git
+    commit: 0b7b4228763a3c6edc76f27f6abeba5ae8017527
 snapshots:
 - completed:
     size: 496111
