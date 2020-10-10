@@ -31,4 +31,3 @@ main = scotty 3000 $ do
   -- (this should be the last handler because it matches all routes)
   notFound $ do
    text "there is no such route."
-
