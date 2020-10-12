@@ -9,12 +9,12 @@ packages:
     version: 0.1.0.0
     git: https://github.com/jzwood/ScrabbleOracle.git
     pantry-tree:
-      size: 2258
-      sha256: 957676fcb3e2b8d979d0f54c68930e25bc9eb96bed902fd9672a7587ee5882e6
-    commit: 0b7b4228763a3c6edc76f27f6abeba5ae8017527
+      size: 2424
+      sha256: 23bf4f772300cadd96aad57a07c8409bad94d07c95805705055f31e47b98eeac
+    commit: 9174dda7be4ee3fa4b9aedea579f0adb0ccfbde3
   original:
     git: https://github.com/jzwood/ScrabbleOracle.git
-    commit: 0b7b4228763a3c6edc76f27f6abeba5ae8017527
+    commit: 9174dda7be4ee3fa4b9aedea579f0adb0ccfbde3
 snapshots:
 - completed:
     size: 532386

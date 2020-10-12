@@ -3,8 +3,8 @@
 
 
 ## Docker
-*Build*
-docker build -t "scrabble-scotty-app:Dockerfile" .
+### Build
+`docker build -t "scrabble-scotty-app:Dockerfile" .`
 
-*run*
-docker run -it --user root <tag> /bin/bash
+### Run
+`docker run -it --user root <tag> /bin/bash`
