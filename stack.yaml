@@ -36,7 +36,7 @@ packages:
 
 extra-deps:
   - git: https://github.com/jzwood/ScrabbleOracle.git
-    commit: 9174dda7be4ee3fa4b9aedea579f0adb0ccfbde3
+    commit: d0d1b787fba46b5ff2aa5e2457b14be1c5ff666f
 # - acme-missiles-0.3
 # - git: https://github.com/commercialhaskell/stack.git
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
