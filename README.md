@@ -28,6 +28,17 @@ params:
 ## Docker
 ### Build
 `docker build -t "scrabble-scotty-app:Dockerfile" .`
+or better
+`docker build -t "jzwood/scrabble-oracle-api:v0.0.0"`
 
 ### Run
-`docker run -it <tag> /bin/bash`
+`docker run -p 5000:3000 -it <tag> /bin/bash`
+
+you can now hit the api at `localhost:5000/board/<board>/rack/<rack>`
+
+## Deploying
+### update tag for remote repo
+`docker tag scrabble-scotty-app:Dockerfile jzwood/scrabble-oracle-api:v0.0.0`
+
+### publish
+`docker push jzwood/scrabble-oracle-api:v0.0.0`

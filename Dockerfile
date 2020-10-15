@@ -12,6 +12,7 @@ WORKDIR /opt/scotty-app
 RUN apt-get update && apt-get install -y ca-certificates libgmp-dev
 
  #NOTICE THIS LINE
-COPY --from=scotty-build /opt/build/.stack-work/install/x86_64-linux/1e8ec7032505a1e485163fd76ac50024dbf7574e77fe77754d88390c9890eede/8.8.4/bin/ .
-EXPOSE 3000
+COPY --from=scotty-build /opt/build/.stack-work/install/x86_64-linux/9e573233521c0d3891de0a40a50043e4b941f9265713503415c2de96fd01409f/8.8.4/bin/ .
+PORT=3000
+EXPOSE $PORT
 ENTRYPOINT ["./scrabble-scotty-app-exe"]
