@@ -11,8 +11,8 @@ ARG BINARY_PATH
 WORKDIR /opt/scotty-app
 RUN apt-get update && apt-get install -y ca-certificates libgmp-dev
 
- #NOTICE THIS LINE
+# Copies just the exe and dict
 COPY --from=scotty-build /opt/build/.stack-work/install/x86_64-linux/9e573233521c0d3891de0a40a50043e4b941f9265713503415c2de96fd01409f/8.8.4/bin/ .
-PORT=3000
+COPY --from=scotty-build /opt/build/dicts/scrabble_words.txt ./dicts/scrabble_words.txt
 EXPOSE $PORT
 ENTRYPOINT ["./scrabble-scotty-app-exe"]

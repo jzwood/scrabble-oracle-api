@@ -27,6 +27,7 @@ source-repository head
 
 library
   exposed-modules:
+      ScrabbleOracleLib
   other-modules:
       Paths_scrabble_scotty_app
   hs-source-dirs:

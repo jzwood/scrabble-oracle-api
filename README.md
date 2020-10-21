@@ -29,14 +29,26 @@ params:
 ### Build
 `docker build -t "scrabble-scotty-app:Dockerfile" .`
 or better
-`docker build -t "jzwood/scrabble-oracle-api:v0.0.0"`
+`docker build -t jzwood/scrabble-oracle-api:v0.0.0 .`
 
 ### Run
 `docker run -p 5000:3000 -it <tag> /bin/bash`
+`docker run -p 5000:3000 -e PORT=3000 -it <tag>`
 
 you can now hit the api at `localhost:5000/board/<board>/rack/<rack>`
 
-## Deploying
+
+## Deploy to Heroku
+either make a new app called "scrabble-oracle-api" in heroku web UI or via CLI: `$ heroku create -a scrabble-oracle-api`, then,
+```
+$ heroku container:login
+$ heroku container:push web -a scrabble-oracle-api
+$ heroku container:release web -a scrabble-oracle-api
+```
+
+
+
+## Publishing to docker hub (not required for deployment)
 ### update tag for remote repo
 `docker tag scrabble-scotty-app:Dockerfile jzwood/scrabble-oracle-api:v0.0.0`
 
