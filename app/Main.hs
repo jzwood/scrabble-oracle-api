@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
 
+import Control.Concurrent
 import Control.Applicative
 import Data.Char (toUpper)
 import Data.Maybe (fromMaybe)
@@ -22,15 +22,6 @@ up = map toUpper
 getPort :: IO Int
 getPort = (\s -> read s :: Int) <$> getEnv "PORT"
 
-data OracleAPIOutput = OracleAPIOutput { board :: String
-                                       , word :: String
-                                       , score :: Score
-                                       } deriving (Generic, Show)
-
-instance ToJSON OracleAPIOutput where
-    toJSON (OracleAPIOutput board word score) =
-      object ["board" .= board, "word" .= word, "score" .= score]
-
 main = do
     port <- getPort  -- this will fail if $PORT is undefined or not an int. todo refactor with Maybe.Read and lookupEnv
     scotty port $ do
@@ -38,6 +29,6 @@ main = do
         do
           strBoard <- up . L.unpack <$> param "1"
           strRack <- up . L.unpack <$> param "2"
-          (b, w, s) <- liftAndCatchIO (getBestPlay strBoard strRack)
-          Web.Scotty.json $ OracleAPIOutput (stringifyBoard b) w s
+          liftAndCatchIO $ forkIO $ emailBestPlay strBoard strRack
+          Web.Scotty.text "task scheduled"
       notFound $ text "there is no such route."

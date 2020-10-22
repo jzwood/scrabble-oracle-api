@@ -37,6 +37,7 @@ library
                 , http-types
                 , text
                 , aeson
+                , time == 1.9.3
                 , scrabble-oracle
   default-language: Haskell2010
 
@@ -53,6 +54,7 @@ executable scrabble-scotty-app-exe
                 , http-types
                 , text
                 , aeson
+                , time == 1.9.3
                 , scrabble-oracle
   default-language: Haskell2010
 
