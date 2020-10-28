@@ -20,11 +20,20 @@ scoreToMarkup score = "<div><strong>SCORE:</strong> " ++ show score ++ "</div>"
 
 emailTemplate :: Board -> String -> Score -> String
 emailTemplate board word score = unlines
-  [ "<div style='font-family: Arial, sans-serif; text-align: center;'>"
-  ,   "<div><strong>THE SCRABBLE ORACLE</strong></div>"
-  ,     boardToMarkup board
-  ,     wordToMarkup word
-  ,     scoreToMarkup score
-  ,   "</div>"
-  , "</div>"
+  [ "<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>"
+  , "<html>"
+  ,   "<head>"
+  ,     "<title>Scrabble Oracle</title>"
+  ,     "<meta name='viewport' content='width=device-width'>"
+  ,     "<meta http-equiv='content-type' content='text/html;charset=utf-8'>"
+  ,   "</head>"
+  ,   "<body style='color: #333;'>"
+  ,     "<section style='font-family: Arial, sans-serif; text-align: center;'>"
+  ,       "<h3>THE SCRABBLE ORACLE</h3>"
+  ,       boardToMarkup board
+  ,       wordToMarkup word
+  ,       scoreToMarkup score
+  ,     "</section>"
+  ,   "</body>"
+  , "</html>"
   ]

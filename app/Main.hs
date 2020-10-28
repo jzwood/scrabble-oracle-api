@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 import Control.Concurrent
 import Control.Applicative
@@ -6,6 +7,7 @@ import Data.Char as Char
 import GHC.Generics
 import Network.HTTP.Types
 import System.Environment (lookupEnv, getEnv)
+import Data.Maybe (fromMaybe)
 import Data.Text as TS
 import Data.Text.Lazy as TL
 import Prelude
@@ -13,27 +15,53 @@ import Prelude
 import ScrabbleOracleLib
 
 import Web.Scotty
-import Data.Aeson
+import Data.Aeson hiding (json)
 
 import Game.ScrabbleBoard
 
 up :: String -> String
 up = Prelude.map Char.toUpper
 
-getPort :: IO Int
-getPort = (\s -> read s :: Int) <$> getEnv "PORT"
+data ScrabbleOraclePost = PostJson
+  { board :: String
+  , rack :: String
+  , rcpt :: String
+  } deriving Generic
 
-getMailGunAPIKey :: IO (Maybe String)
-getMailGunAPIKey = lookupEnv "MAILGUN_API_KEY"
+
+instance ToJSON ScrabbleOraclePost where
+    toEncoding = genericToEncoding defaultOptions
+
+instance FromJSON ScrabbleOraclePost
+
+getPort :: IO Int
+getPort = read . fromMaybe "3000" <$> lookupEnv "PORT"
+
+getFrom :: IO (Maybe String)
+getFrom = lookupEnv "MAIL_FROM"
 
 main = do
-    port <- getPort  -- this will fail if $PORT is undefined or not an int. todo refactor with Maybe.Read and lookupEnv
-    maybeApiKey <- getMailGunAPIKey
+    port <- getPort
+    address <- getFrom
     scotty port $ do
-      get (regex "^/board/([a-zA-Z1234_]{225})/rack/([a-zA-Z]{7})$") $
+      post "/ask-the-scrabble-oracle" $
         do
-          strBoard <- up . TL.unpack <$> param "1"
-          strRack <- up . TL.unpack <$> param "2"
-          liftAndCatchIO $ forkIO $ emailBestPlay maybeApiKey strBoard strRack
-          Web.Scotty.text "task scheduled"
+          jsonReq <- jsonData :: ActionM ScrabbleOraclePost
+          let strBoard = board jsonReq
+              strRack = rack jsonReq
+              strAddress = rcpt jsonReq
+          setHeader "Content-Type" "application/text"
+          if
+             validateInput strBoard strRack strAddress
+          then do
+            status status202
+            text "task scheduled"
+          else do
+            status badRequest400
+            text "malformed input"
       notFound $ text "there is no such route."
+
+
+
+--liftAndCatchIO $ forkIO $ emailBestPlay maybeApiKey strBoard strRack
+--(regex "^/board/([a-zA-Z1234_]{225})/rack/([a-zA-Z]{7})$") $

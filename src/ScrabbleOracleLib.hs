@@ -3,12 +3,11 @@
 module ScrabbleOracleLib where
 
 import Control.Applicative
-import Control.Lens
 import Data.Aeson
 import Data.Time.Clock.POSIX
 import GHC.Generics
-import Network.Wreq
 import Web.Scotty
+import System.Process
 
 import Data.ByteString.Lazy.UTF8 as BLU -- from utf8-string
 import Data.ByteString.UTF8 as BSU      -- from utf8-string
@@ -20,7 +19,17 @@ import Game.SingleBestPlay
 import Game.ScrabbleBoard
 import EmailTemplate
 
+
 import Data.Maybe (fromMaybe)
+
+validateAddress :: String -> Bool
+validateAddress = any ((=='@') .|| (=='.')) -- silly I know but it's good enough ftm
+
+validateInput :: String -> String -> String -> Bool
+validateInput board rack address =
+  parseBoard board /= Nothing &&
+    parseRack rack /= Nothing &&
+      validateAddress address
 
 getBestPlay :: String -> String -> IO (Board, String, Score)
 getBestPlay strBoard strRack = bestPlay
@@ -36,25 +45,25 @@ writeToFile str = do
   P.writeFile ("./media/board_" ++ time ++ ".html") str
   return ()
 
-sendEmail :: BSU.ByteString -> BSU.ByteString -> BSU.ByteString -> IO (Response BLU.ByteString)
-sendEmail apiKey to html = postWith opts url
-  [ "from" := ("Scrabble Oracle App <mailgun@sandboxc9f2eaeb1dc741a6b5e0849924393f85.mailgun.org>" :: BSU.ByteString)
-  , "to" := to
-  , "subject" := ("Scrabble Oracle Best Play" :: BSU.ByteString)
-  , "html":= html
-  , "require_tls" := ("true" :: BSU.ByteString)
-  ]
+sendEmail :: String -> String -> String -> IO ()
+sendEmail to from html = createProcess (shell curl) >>= cleanupProcess
   where
-    opts = defaults & auth ?~ basicAuth "api" apiKey
-    url = "https://api.mailgun.net/v3/sandboxc9f2eaeb1dc741a6b5e0849924393f85.mailgun.org/messages"
+    body = unlines [ "Subject: Scrabble Oracle Best Play"
+                   , "From:", from
+                   , "Content-Type: text/html; charset=\"utf8\""
+                   , html
+                   ]
+    curl = unwords ["curl -sS --url 'smtps://smtp.gmail.com:465' --ssl-reqd --mail-from" , from
+                   , "--mail-rcpt" , to
+                   , "--upload-file <(echo " ++ body ++ "\")"
+                   , "--user \"" , from ++ ":$EMAIL_APP_KEY\""  -- curl can access env variables
+                   ]
 
--- saves output to disc when mail gun api ENV is not set
-emailBestPlay :: Maybe String -> String -> String -> IO ()
-emailBestPlay maybeApiKey strBoard strRack = do
+-- saves output to disc when either to or from address is Nothing
+emailBestPlay :: Maybe String -> Maybe String -> String -> String -> IO ()
+emailBestPlay maybeFrom maybeTo strBoard strRack = do
     (board, word, score) <- getBestPlay strBoard strRack
     let emailHTML = emailTemplate board word score
-    case maybeApiKey of
-      Nothing -> writeToFile emailHTML
-      Just apiKey -> do
-        sendEmail (BSU.fromString apiKey) "jzwood14@gmail.com" $ BSU.fromString emailHTML
-        return ()
+    case (maybeFrom, maybeTo) of
+      (Just from, Just to) -> sendEmail to from emailHTML
+      _ -> writeToFile emailHTML
