@@ -47,18 +47,18 @@ main = do
       post "/ask-the-scrabble-oracle" $
         do
           jsonReq <- jsonData :: ActionM ScrabbleOraclePost
+          setHeader "Content-Type" "application/text"
           let strBoard = board jsonReq
               strRack = rack jsonReq
               strAddress = rcpt jsonReq
-          setHeader "Content-Type" "application/text"
-          if
-             validateInput strBoard strRack strAddress
-          then do
-            status status202
-            text "task scheduled"
-          else do
-            status badRequest400
-            text "malformed input"
+              validInput = validateInput strBoard strRack strAddress
+          case validInput of
+            Left errors -> do
+              status badRequest400
+              text $ TL.pack errors
+            Right _ -> do
+              status status202
+              text "task scheduled"
       notFound $ text "there is no such route."
 
 

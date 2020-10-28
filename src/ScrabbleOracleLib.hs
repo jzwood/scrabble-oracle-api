@@ -20,16 +20,17 @@ import Game.ScrabbleBoard
 import EmailTemplate
 
 
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, isJust)
 
 validateAddress :: String -> Bool
-validateAddress = any ((=='@') .|| (=='.')) -- silly I know but it's good enough ftm
+validateAddress = elem '@' .&&  elem '.'
 
-validateInput :: String -> String -> String -> Bool
-validateInput board rack address =
-  parseBoard board /= Nothing &&
-    parseRack rack /= Nothing &&
-      validateAddress address
+validateInput :: String -> String -> String -> Either String Bool
+validateInput board rack address = boardIsValid >>= rackIsValid >>= addressIsValid
+  where
+    boardIsValid = if isJust (parseBoard board) then Right True else Left "malformed board"
+    rackIsValid _ = if isJust (parseRack rack) then Right True else Left "malformed rack"
+    addressIsValid _ = if validateAddress address then Right True else Left "malformed rcpt email address"
 
 getBestPlay :: String -> String -> IO (Board, String, Score)
 getBestPlay strBoard strRack = bestPlay
