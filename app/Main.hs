@@ -37,12 +37,8 @@ instance FromJSON ScrabbleOraclePost
 getPort :: IO Int
 getPort = read . fromMaybe "3000" <$> lookupEnv "PORT"
 
-getFrom :: IO (Maybe String)
-getFrom = lookupEnv "MAIL_FROM"
-
 main = do
     port <- getPort
-    address <- getFrom
     scotty port $ do
       post "/ask-the-scrabble-oracle" $
         do
@@ -57,11 +53,7 @@ main = do
               status badRequest400
               text $ TL.pack errors
             Right _ -> do
+              liftAndCatchIO $ forkIO $ emailBestPlay strAddress strBoard strRack
               status status202
               text "task scheduled"
       notFound $ text "there is no such route."
-
-
-
---liftAndCatchIO $ forkIO $ emailBestPlay maybeApiKey strBoard strRack
---(regex "^/board/([a-zA-Z1234_]{225})/rack/([a-zA-Z]{7})$") $

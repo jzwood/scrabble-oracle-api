@@ -6,8 +6,9 @@ import Control.Applicative
 import Data.Aeson
 import Data.Time.Clock.POSIX
 import GHC.Generics
-import Web.Scotty
+import System.Environment (lookupEnv, getEnv)
 import System.Process
+import Web.Scotty
 
 import Data.ByteString.Lazy.UTF8 as BLU -- from utf8-string
 import Data.ByteString.UTF8 as BSU      -- from utf8-string
@@ -46,25 +47,51 @@ writeToFile str = do
   P.writeFile ("./media/board_" ++ time ++ ".html") str
   return ()
 
-sendEmail :: String -> String -> String -> IO ()
-sendEmail to from html = createProcess (shell curl) >>= cleanupProcess
+emailToFilePath :: String -> String
+emailToFilePath email =
+  let
+    repl :: Char -> String
+    repl '@' = "_at_"
+    repl '.' = "_dot_"
+    repl c = [c]
+    sanitizedEmail = concatMap repl email
+  in
+    "mail_" ++ sanitizedEmail ++ ".txt"
+
+sendEmail :: String -> String -> IO ()
+sendEmail to html = do
+  P.writeFile emailFilePath body
+  curlProc@(_, _, _, processHandle) <- createProcess (shell curl)
+  waitForProcess processHandle
+  cleanupProcess curlProc
   where
-    body = unlines [ "Subject: Scrabble Oracle Best Play"
-                   , "From:", from
-                   , "Content-Type: text/html; charset=\"utf8\""
+    emailFilePath = emailToFilePath to -- TODO use UUID
+    body = unlines [ "From: Scrabble Oracle App <carpechipmunk@gmail.com>"
+                   , "To: " ++ to
+                   , "Subject: Scrabble Oracle Best Play"
+                   , "Content-Type: text/html; charset=\"utf8\"\n"
                    , html
                    ]
-    curl = unwords ["curl -sS --url 'smtps://smtp.gmail.com:465' --ssl-reqd --mail-from" , from
+    curl = unwords [ "curl -sS --url 'smtps://smtp.gmail.com:465' --ssl-reqd"
+                   , "--mail-from $MAIL_FROM"
                    , "--mail-rcpt" , to
-                   , "--upload-file <(echo " ++ body ++ "\")"
-                   , "--user \"" , from ++ ":$EMAIL_APP_KEY\""  -- curl can access env variables
+                   , "--upload-file", emailFilePath
+                   , "--user \"$MAIL_FROM:$EMAIL_APP_KEY\""  -- curl can access env variables
                    ]
 
+isProduction :: IO Bool
+isProduction = isJust <$> lookupEnv "PRODUCTION"
+
 -- saves output to disc when either to or from address is Nothing
-emailBestPlay :: Maybe String -> Maybe String -> String -> String -> IO ()
-emailBestPlay maybeFrom maybeTo strBoard strRack = do
+emailBestPlay :: String -> String -> String -> IO ()
+emailBestPlay strAddress strBoard strRack = do
     (board, word, score) <- getBestPlay strBoard strRack
+    production <- isProduction
     let emailHTML = emailTemplate board word score
-    case (maybeFrom, maybeTo) of
-      (Just from, Just to) -> sendEmail to from emailHTML
-      _ -> writeToFile emailHTML
+    if production
+      then do
+        putStrLn $ "sending email to " ++ strAddress
+        sendEmail strAddress emailHTML
+      else do
+        putStrLn "writing email to disc"
+        writeToFile emailHTML

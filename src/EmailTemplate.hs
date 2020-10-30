@@ -6,11 +6,11 @@ import qualified Data.Matrix as Mat
 
 boardToMarkup :: Board -> String
 boardToMarkup board =
-  "<table style='border: 1px solid black; padding: 2px; margin: 12px auto; text-align: center; line-height: 1;'><tbody>" ++
+  "<table style='border: 2px solid black; padding: 4px; margin: 12px auto; text-align: center; line-height: 1;'><tbody>" ++
   (unlines . map row $ Mat.toLists $ easyReadBoard board) ++
   "</tbody></table>"
     where
-      row cs = "<tr>" ++ concatMap (\c -> "<td style='padding: 0 3px;'>" ++ if c == ' ' then "&nbsp;" else c : "</td>") cs ++ "</tr>"
+      row cs = "<tr>" ++ concatMap (\c -> "<td>" ++ if c == ' ' then "&nbsp;" else c : "</td>") cs ++ "</tr>"
 
 wordToMarkup :: String -> String
 wordToMarkup word = "<div><strong>WORD:</strong> " ++ word ++ "</div>"
@@ -26,6 +26,9 @@ emailTemplate board word score = unlines
   ,     "<title>Scrabble Oracle</title>"
   ,     "<meta name='viewport' content='width=device-width'>"
   ,     "<meta http-equiv='content-type' content='text/html;charset=utf-8'>"
+  ,     "<style>"
+  ,       "td { padding: 0 3px; }"
+  ,     "</style>"
   ,   "</head>"
   ,   "<body style='color: #333;'>"
   ,     "<section style='font-family: Arial, sans-serif; text-align: center;'>"
