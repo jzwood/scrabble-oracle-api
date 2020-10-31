@@ -35,7 +35,7 @@ instance ToJSON ScrabbleOraclePost where
 instance FromJSON ScrabbleOraclePost
 
 getPort :: IO Int
-getPort = read . fromMaybe "3000" <$> lookupEnv "PORT"
+getPort = read . fromMaybe "3000" <$> lookupEnv "PORT" -- TODO: make 3000 if PORT is not an integer
 
 main = do
     port <- getPort

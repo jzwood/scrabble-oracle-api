@@ -50,7 +50,7 @@ docker run -p 5000:3000 -e PORT=3000 \
   -it <tag>
 ```
 or
-`docker run -p 5000:3000 --env-file .secrets -it <tag>`
+`docker run -p 5000:3000 --env-file secrets -it <tag>`
 
 you can now hit the api at `localhost:5000/board/<board>/rack/<rack>`
 
