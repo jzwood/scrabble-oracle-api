@@ -12,15 +12,17 @@ scrabble-scotty-app-exe
 
 hit api via CURL or Postman:
 ```haskell
-localhost:3000/board/<board>/rack/<rack>
-params:
+localhost:3000/ask-the-scrabble-oracle
+body:
   - board:
     * 225 characters of scrabble board (left to right and top to bottom)
     * uppercase
     * empty space = '_'
   - rack
-    * 7 characters of rack (5-7 allowed)
+    * 7 characters of rack
     * uppercase
+  - rcpt:
+    * recipient email address
 ```
 
 # deploy
@@ -32,8 +34,23 @@ or better
 `docker build -t jzwood/scrabble-oracle-api:v0.0.0 .`
 
 ### Run
+set the following environment variables
+```
+export MAIL_FROM=
+export MAIL_APP_KEY=
+export PRODUCTION=
+```
+
 `docker run -p 5000:3000 -it <tag> /bin/bash`
-`docker run -p 5000:3000 -e PORT=3000 -it <tag>`
+```
+docker run -p 5000:3000 -e PORT=3000 \
+  -e MAIL_FROM= \
+  -e MAIL_APP_KEY= \
+  -e PRODUCTION=TRUE \
+  -it <tag>
+```
+or
+`docker run -p 5000:3000 --env-file .secrets -it <tag>`
 
 you can now hit the api at `localhost:5000/board/<board>/rack/<rack>`
 
@@ -46,6 +63,7 @@ $ heroku container:push web -a scrabble-oracle-api
 $ heroku container:release web -a scrabble-oracle-api
 ```
 
+Make sure to set the env variables defined in the .secrets file.
 
 
 ## Publishing to docker hub (not required for deployment)
