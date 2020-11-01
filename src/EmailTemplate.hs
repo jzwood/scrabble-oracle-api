@@ -31,6 +31,10 @@ emailTemplate board word score = unlines
   ,     "</style>"
   ,   "</head>"
   ,   "<body style='color: #333;'>"
+  ,     "<div style='display: none; max-height: 0px; overflow: hidden;'>"
+  ,       "Your best word is \"" ++ word ++ "\" for", show score, "points."
+  ,       concat $ replicate 90 "&nbsp;&zwnj;"
+  ,     "</div>"
   ,     "<section style='font-family: Arial, sans-serif; text-align: center;'>"
   ,       "<h3>THE SCRABBLE ORACLE</h3>"
   ,       boardToMarkup board

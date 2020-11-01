@@ -63,8 +63,12 @@ $ heroku container:push web -a scrabble-oracle-api
 $ heroku container:release web -a scrabble-oracle-api
 ```
 
-Make sure to set the env variables defined in the .secrets file.
+Make sure to set the env variables defined in the `secrets` file.
 
+check the logs:
+```
+$ heroku logs --app scrabble-oracle-api
+```
 
 ## Publishing to docker hub (not required for deployment)
 ### update tag for remote repo
