@@ -40,10 +40,17 @@ getPort = read . fromMaybe "3000" <$> lookupEnv "PORT" -- TODO: make 3000 if POR
 main = do
     port <- getPort
     scotty port $ do
+      options "/ask-the-scrabble-oracle" $
+        do
+          status status204
+          setHeader "Access-Control-Allow-Methods" "POST"
+          setHeader "Access-Control-Allow-Headers" "Origin, Content-Type, Accept"
+          setHeader "Access-Control-Allow-Origin" "http://localhost:1234"
       post "/ask-the-scrabble-oracle" $
         do
           jsonReq <- jsonData :: ActionM ScrabbleOraclePost
-          setHeader "Content-Type" "application/text"
+          setHeader "Access-Control-Allow-Headers" "Origin, Content-Type, Accept"
+          setHeader "Access-Control-Allow-Origin" "http://localhost:1234"
           let strBoard = board jsonReq
               strRack = rack jsonReq
               strAddress = rcpt jsonReq

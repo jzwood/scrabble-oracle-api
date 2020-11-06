@@ -51,7 +51,7 @@ writeToFile str = do
 sendEmail :: String -> String -> String -> IO ()
 sendEmail from to html = do
   uuid <- nextRandom
-  let emailFilePath = "mail-" ++ show uuid ++ ".txt"
+  let emailFilePath = "media/mail-" ++ show uuid ++ ".txt"
   P.writeFile emailFilePath body
   curlProc@(_, _, _, processHandle) <- createProcess (shell $ curl emailFilePath)
   waitForProcess processHandle

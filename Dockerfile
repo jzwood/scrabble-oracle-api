@@ -9,6 +9,7 @@ FROM ubuntu:18.04
 RUN mkdir -p /opt/scotty-app
 ARG BINARY_PATH
 WORKDIR /opt/scotty-app
+RUN mkdir media
 RUN apt-get update && apt-get install -y ca-certificates libgmp-dev && apt-get install curl -y
 
 # Copies just the exe and dict
