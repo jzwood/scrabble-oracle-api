@@ -45,12 +45,12 @@ main = do
           status status204
           setHeader "Access-Control-Allow-Methods" "POST"
           setHeader "Access-Control-Allow-Headers" "Origin, Content-Type, Accept"
-          setHeader "Access-Control-Allow-Origin" "http://localhost:1234"
+          setHeader "Access-Control-Allow-Origin" "*" -- change to something more specific once I've deployed UI
       post "/ask-the-scrabble-oracle" $
         do
           jsonReq <- jsonData :: ActionM ScrabbleOraclePost
           setHeader "Access-Control-Allow-Headers" "Origin, Content-Type, Accept"
-          setHeader "Access-Control-Allow-Origin" "http://localhost:1234"
+          setHeader "Access-Control-Allow-Origin" "*" -- change to something more specific once I've deployed UI
           let strBoard = board jsonReq
               strRack = rack jsonReq
               strAddress = rcpt jsonReq
