@@ -76,3 +76,10 @@ $ heroku logs --app scrabble-oracle-api
 
 ### publish
 `docker push jzwood/scrabble-oracle-api:v0.0.0`
+
+
+### PostgreSQL
+```
+docker-compose exec postgres bash
+psql -U oracle scrabble-oracle-db
+```

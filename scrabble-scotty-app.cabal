@@ -29,6 +29,8 @@ library
   exposed-modules:
       ScrabbleOracleLib
       EmailTemplate
+      App
+      Utils
   other-modules:
       Paths_scrabble_scotty_app
   hs-source-dirs:
