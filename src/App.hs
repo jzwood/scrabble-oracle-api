@@ -1,25 +1,28 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module App where
 
-import Control.Concurrent
 import Control.Applicative
+import Control.Concurrent
+import Data.Aeson hiding (json)
 import Data.Char as Char
+import Data.Maybe (fromMaybe)
+import Data.Text.Lazy as TL
+import Data.ByteString.UTF8 as BSU
+import Data.UUID.Types as UUID
 import GHC.Generics
 import Network.HTTP.Types
+import Network.Wai (requestHeaderHost)
 import System.Environment (lookupEnv, getEnv)
-import Data.Maybe (fromMaybe)
-import Data.Text as TS
-import Data.Text.Lazy as TL
-
-import ScrabbleOracleLib
-
 import Web.Scotty
-import Data.Aeson hiding (json)
 
 import Game.ScrabbleBoard
-import Utils (up)
+import Game.SingleBestPlay
+import PostgresQueries
+
+import Utils
 
 
 data ScrabbleOraclePost = PostJson
@@ -34,14 +37,9 @@ instance ToJSON ScrabbleOraclePost where
 
 instance FromJSON ScrabbleOraclePost
 
-tellOracleRoute = "/tell-the-scrabble-oracle" -- post board/rack data
-askOracleRoute = "^/ask-the-scrabble-oracle/([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$)" -- get word/score
+tellOracleRoute = "/tell-the-scrabble-oracle"
+askOracleRoute = "^/ask-the-scrabble-oracle/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$)" -- get word/score
 
-getBestPlayByUUID :: TL.Text -> Integer
-getBestPlayByUUID _ = 200 -- TODO
-
-addNewBoardRackQuery :: String -> String -> IO ()
-addNewBoardRackQuery board rack = undefined
 
 app :: Int -> IO ()
 app port =
@@ -65,16 +63,29 @@ app port =
           setHeader "Access-Control-Allow-Origin" "*" -- change to something more specific once I've deployed UI
           let strBoard = board jsonReq
               strRack = rack jsonReq
-              strAddress = rcpt jsonReq
-              validInput = validateInput strBoard strRack strAddress
-          case validInput of
-            Left errors -> do
+              mBoard = parseBoard strBoard
+              mRack = parseRack strRack
+          case (mBoard, mRack) of
+            (Nothing, _) -> do
               status badRequest400
-              text $ TL.pack errors
-            Right _ -> do
-              liftAndCatchIO $ forkIO $ emailBestPlay strAddress strBoard strRack
-              status status202
-              text "task scheduled"
+              text $ TL.pack "malformed board"
+            (_, Nothing) -> do
+              status badRequest400
+              text $ TL.pack "malformed rack"
+            (Just parsedBoard, Just parsedRack) -> do
+              maybeIdUUID <- liftAndCatchIO $ putRackBoard strRack strBoard
+              host <- fromMaybe "unknownhost" . requestHeaderHost <$> request
+              let domain = "https://" ++ BSU.toString host ++ "/ask-the-scrabble-oracle/"
+              case maybeIdUUID of
+                Nothing -> do -- rack and board already exist in DB
+                  muuid <- liftAndCatchIO $ getUUIDByRackBoard strRack strBoard
+                  let uuid = maybe "" UUID.toString muuid
+                  status status200
+                  text $ TL.pack $ domain ++ uuid
+                Just (id, uuid) -> do
+                  liftAndCatchIO $ forkIO $ saveBestPlay parsedBoard parsedRack id
+                  status status202
+                  text $ TL.pack $ domain ++ UUID.toString uuid
       get (regex askOracleRoute) $
         do
           uuid <- param "1"

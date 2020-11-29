@@ -1,5 +1,5 @@
 .stack-work/
 *~
 .DS_Store
-.secrets
+.git/
 media/

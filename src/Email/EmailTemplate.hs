@@ -1,4 +1,4 @@
-module EmailTemplate where
+module Email.EmailTemplate where
 
 import Game.SingleBestPlay
 import Game.ScrabbleBoard

@@ -13,11 +13,11 @@ CREATE TABLE oracle.query_rack_board (
 
 CREATE TABLE oracle.best_play (
   id SERIAL PRIMARY KEY,
-  board VARCHAR(225) NOT NULL,
+  board VARCHAR(240) NOT NULL,  -- 225 + 15 \n chars
   word VARCHAR(15) NOT NULL,
   score SMALLINT NOT NULL,
   query_rack_board_id INTEGER,
-  UNIQUE query_rack_board_id,
+  UNIQUE(query_rack_board_id),
   CONSTRAINT fk_query_rack_board
     FOREIGN KEY(query_rack_board_id)
       REFERENCES oracle.query_rack_board(id)

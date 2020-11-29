@@ -2,19 +2,29 @@ version: '3'
 
 services:
   web:
-    build: .
-    image: jzwood/scrabble-oracle-api:v0.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile-localdev
+    command: scrabble-scotty-app-exe
+    image: localdev/scrabble-oracle-api:v0.0.0
     env_file:
-    - app.env
+      - app.env
     ports:
       - "5000:3000"
+    volumes:
+      - scrabble-app:/app:delegated
+      - scrabble-src:/src:delegated
+      - scrabble-exe:/.stack-work/install
   postgres:
-    image: "postgres:13-alpine"
+    image: "postgres:13"
     ports:
       - "1234:5432"
     volumes:
       - postgres:/var/lib/postgresql/data
     env_file:
-    - db.env
+      - db.env
 volumes:
   postgres:
+  scrabble-app:
+  scrabble-src:
+  scrabble-exe:

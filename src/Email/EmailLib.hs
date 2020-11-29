@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module ScrabbleOracleLib where
+module Email.EmailLib where
 
 import Control.Applicative
 import Data.Aeson
