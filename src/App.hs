@@ -7,10 +7,11 @@ module App where
 import Control.Applicative
 import Control.Concurrent
 import Data.Aeson hiding (json)
+import Data.ByteString.UTF8 as BSU
 import Data.Char as Char
+import Data.Int
 import Data.Maybe (fromMaybe)
 import Data.Text.Lazy as TL
-import Data.ByteString.UTF8 as BSU
 import Data.UUID.Types as UUID
 import GHC.Generics
 import Network.HTTP.Types
@@ -25,17 +26,26 @@ import PostgresQueries
 import Utils
 
 
-data ScrabbleOraclePost = PostJson
+data BoardRackJson = BoardRackJson
   { board :: String
   , rack :: String
-  , rcpt :: String
   } deriving Generic
 
-
-instance ToJSON ScrabbleOraclePost where
+instance ToJSON BoardRackJson where
     toEncoding = genericToEncoding defaultOptions
 
-instance FromJSON ScrabbleOraclePost
+instance FromJSON BoardRackJson
+
+data BestPlayJson = BestPlayJson
+  { newBoard :: String
+  , word :: String
+  , score :: Int64
+  } deriving Generic
+
+instance ToJSON BestPlayJson where
+    toEncoding = genericToEncoding defaultOptions
+
+instance FromJSON BestPlayJson
 
 tellOracleRoute = "/tell-the-scrabble-oracle"
 askOracleRoute = "^/ask-the-scrabble-oracle/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$)" -- get word/score
@@ -58,7 +68,7 @@ app port =
           setHeader "Access-Control-Allow-Origin" "*"
       post tellOracleRoute $
         do
-          jsonReq <- jsonData :: ActionM ScrabbleOraclePost
+          jsonReq <- jsonData :: ActionM BoardRackJson
           setHeader "Access-Control-Allow-Headers" "Origin, Content-Type, Accept"
           setHeader "Access-Control-Allow-Origin" "*" -- change to something more specific once I've deployed UI
           let strBoard = board jsonReq
@@ -91,6 +101,14 @@ app port =
           uuid <- param "1"
           setHeader "Access-Control-Allow-Headers" "Origin, Content-Type, Accept"
           setHeader "Access-Control-Allow-Origin" "*"
-          status status200
-          text uuid
+          boardRackExists <- liftAndCatchIO $ doesBoardRackUuidExist uuid
+          if not boardRackExists then do
+              status status404
+              text "resource not found"
+          else do
+            status status200
+            mBestPlay <- liftAndCatchIO $ getBestPlayByUUID uuid
+            case mBestPlay of
+              Nothing -> text "still processing..."
+              Just (word, score, board) -> json $ BestPlayJson { newBoard = board, word = word, score = score }
       notFound $ text "there is no such route."

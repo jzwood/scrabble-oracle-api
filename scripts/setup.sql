@@ -21,4 +21,5 @@ CREATE TABLE oracle.best_play (
   CONSTRAINT fk_query_rack_board
     FOREIGN KEY(query_rack_board_id)
       REFERENCES oracle.query_rack_board(id)
+        ON DELETE CASCADE
 );

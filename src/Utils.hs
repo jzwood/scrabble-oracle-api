@@ -34,7 +34,7 @@ getBestPlay strBoard strRack = bestPlay
 saveBestPlay :: Board -> Rack -> Integer -> IO ()
 saveBestPlay board rack fk = do
     (board', word, score) <- makeSinglePlay board rack
-    putBestPlay' (stringifyBoard board') word score fk
+    putBestPlay (stringifyBoard board') word score fk
     return ()
 
 up :: String -> String
