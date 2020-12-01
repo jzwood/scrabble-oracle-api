@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile-localdev
     command: scrabble-scotty-app-exe
-    image: localdev/scrabble-oracle-api:v0.0.0
+    image: localdev/scrabble-oracle-api:v0.0.2
     env_file:
       - app.env
     ports:
@@ -15,8 +15,10 @@ services:
       - scrabble-app:/app:delegated
       - scrabble-src:/src:delegated
       - scrabble-exe:/.stack-work/install
+    depends_on:
+      - postgres
   postgres:
-    image: "postgres:13"
+    image: "postgres:13-alpine"
     ports:
       - "1234:5432"
     volumes:

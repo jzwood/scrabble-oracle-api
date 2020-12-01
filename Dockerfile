@@ -2,7 +2,8 @@ FROM fpco/stack-build:lts-16.17 as scotty-build
 
 RUN mkdir /opt/build
 COPY . /opt/build
-RUN cd /opt/build && stack build --copy-bins --resolver lts-16.17 --system-ghc    # uses GHC available on the path (ie already installed in container)
+WORKDIR /opt/build
+RUN stack build --copy-bins --resolver lts-16.17 --system-ghc    # uses GHC available on the path (ie already installed in container)
 
 # make sure base ubuntu image is the same as fpco base image $ lsb_release -a
 FROM ubuntu:18.04

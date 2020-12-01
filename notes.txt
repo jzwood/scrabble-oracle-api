@@ -1,9 +1,0 @@
-data OracleAPIOutput = OracleAPIOutput { board :: String
-                                       , word :: String
-                                       , score :: Score
-                                       } deriving (Generic, Show)
-
-instance ToJSON OracleAPIOutput where
-    toJSON (OracleAPIOutput board word score) =
-      object ["board" .= board, "word" .= word, "score" .= score]
-
