@@ -9,6 +9,9 @@ services:
     image: localdev/scrabble-oracle-api:v0.0.2
     env_file:
       - app.env
+    environment:
+      - TPG_HOST=postgres
+      - TPG_PORT=5432
     ports:
       - "5000:3000"
     volumes:

@@ -25,7 +25,6 @@ import PostgresQueries
 
 import Utils
 
-
 data BoardRackJson = BoardRackJson
   { board :: String
   , rack :: String
@@ -50,9 +49,8 @@ instance FromJSON BestPlayJson
 tellOracleRoute = "/tell-the-scrabble-oracle"
 askOracleRoute = "^/ask-the-scrabble-oracle/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$)" -- get word/score
 
-
-app :: Int -> IO ()
-app port =
+app :: Int -> PostgresEnv -> IO ()
+app port pgEnv =
     scotty port $ do
       options tellOracleRoute $
         do
@@ -83,17 +81,17 @@ app port =
               status badRequest400
               text $ TL.pack "malformed rack"
             (Just parsedBoard, Just parsedRack) -> do
-              maybeIdUUID <- liftAndCatchIO $ putRackBoard strRack strBoard
+              maybeIdUUID <- liftAndCatchIO $ putRackBoard pgEnv strRack strBoard
               host <- fromMaybe "unknownhost" . requestHeaderHost <$> request
               let domain = "https://" ++ BSU.toString host ++ "/ask-the-scrabble-oracle/"
               case maybeIdUUID of
                 Nothing -> do -- rack and board already exist in DB
-                  muuid <- liftAndCatchIO $ getUUIDByRackBoard strRack strBoard
+                  muuid <- liftAndCatchIO $ getUUIDByRackBoard pgEnv strRack strBoard
                   let uuid = maybe "" UUID.toString muuid
                   status status200
                   text $ TL.pack $ domain ++ uuid
                 Just (id, uuid) -> do
-                  liftAndCatchIO $ forkIO $ saveBestPlay parsedBoard parsedRack id
+                  liftAndCatchIO $ forkIO $ saveBestPlay pgEnv parsedBoard parsedRack id
                   status status202
                   text $ TL.pack $ domain ++ UUID.toString uuid
       get (regex askOracleRoute) $
@@ -101,13 +99,13 @@ app port =
           uuid <- param "1"
           setHeader "Access-Control-Allow-Headers" "Origin, Content-Type, Accept"
           setHeader "Access-Control-Allow-Origin" "*"
-          boardRackExists <- liftAndCatchIO $ doesBoardRackUuidExist uuid
+          boardRackExists <- liftAndCatchIO $ doesBoardRackUuidExist pgEnv uuid
           if not boardRackExists then do
               status status404
               text "resource not found"
           else do
             status status200
-            mBestPlay <- liftAndCatchIO $ getBestPlayByUUID uuid
+            mBestPlay <- liftAndCatchIO $ getBestPlayByUUID pgEnv uuid
             case mBestPlay of
               Nothing -> text "still processing..."
               Just (word, score, board) -> json $ BestPlayJson { newBoard = board, word = word, score = score }

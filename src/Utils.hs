@@ -31,10 +31,10 @@ getBestPlay strBoard strRack = bestPlay
     maybeIOBestPlay = liftA2 makeSinglePlay board rack
     bestPlay = fromMaybe (return (nullBoard, "", 0)) maybeIOBestPlay
 
-saveBestPlay :: Board -> Rack -> Integer -> IO ()
-saveBestPlay board rack fk = do
+saveBestPlay :: PostgresEnv -> Board -> Rack -> Integer -> IO ()
+saveBestPlay pgEnv board rack fk = do
     (board', word, score) <- makeSinglePlay board rack
-    putBestPlay (stringifyBoard board') word score fk
+    putBestPlay pgEnv (stringifyBoard board') word score fk
     return ()
 
 up :: String -> String
