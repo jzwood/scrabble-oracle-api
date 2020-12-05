@@ -5,13 +5,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-localdev
-      args:
-        - TPG_HOST=postgres
-        - TPG_PORT=5432
     command: bash -c "stack install && scrabble-scotty-app-exe"
     image: localdev/scrabble-oracle-api:v0.0.2
     env_file:
       - app.env
+    environment:
+      - TPG_HOST=postgres
+      - TPG_PORT=5432
     ports:
       - "5000:3000"
     volumes:

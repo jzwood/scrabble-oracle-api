@@ -83,6 +83,12 @@ check the logs:
 $ heroku logs --app scrabble-oracle-api
 ```
 
+**Postgres**
+```
+heroku pg:psql postgresql-flexible-80984 --app scrabble-oracle-api
+```
+
+
 ## Publishing to docker hub (not required for deployment)
 ### update tag for remote repo
 `docker tag scrabble-scotty-app:Dockerfile jzwood/scrabble-oracle-api:v0.0.0`

@@ -20,4 +20,4 @@ COPY --from=scotty-build /usr/lib/x86_64-linux-gnu/ /usr/lib/x86_64-linux-gnu/
 COPY --from=scotty-build /lib/x86_64-linux-gnu/ /lib/x86_64-linux-gnu/
 
 EXPOSE $PORT
-#ENTRYPOINT ["./scrabble-scotty-app-exe"]
+ENTRYPOINT ["./scrabble-scotty-app-exe"]
