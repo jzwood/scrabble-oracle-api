@@ -83,7 +83,7 @@ app port pgEnv =
             (Just parsedBoard, Just parsedRack) -> do
               maybeIdUUID <- liftAndCatchIO $ putRackBoard pgEnv strRack strBoard
               host <- fromMaybe "unknownhost" . requestHeaderHost <$> request
-              let domain = "https://" ++ BSU.toString host ++ "/ask-the-scrabble-oracle/"
+              let domain = BSU.toString host ++ "/ask-the-scrabble-oracle/"  -- ? prepend with https://
               case maybeIdUUID of
                 Nothing -> do -- rack and board already exist in DB
                   muuid <- liftAndCatchIO $ getUUIDByRackBoard pgEnv strRack strBoard

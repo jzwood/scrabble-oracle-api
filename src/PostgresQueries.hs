@@ -15,7 +15,7 @@ data PostgresEnv = PostgresEnv
   , pgUser :: String
   , pgPassword :: String
   , pgDBName :: String
-  }
+  } deriving (Show)
 
 ask :: PostgresEnv -> BSU.ByteString
 ask PostgresEnv { pgHost = host

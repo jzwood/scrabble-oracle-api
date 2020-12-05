@@ -25,6 +25,19 @@ body:
     * recipient email address
 ```
 
+# run locally
+### outside docker
+```
+set -a
+source app.env && source db.env
+set +a
+stack install
+scrabble-scotty-app-exe
+```
+
+### with docker
+
+### with docker-compose
 # deploy
 
 ## Docker

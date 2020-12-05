@@ -8,13 +8,6 @@ import App (app)
 getPort :: IO Int
 getPort = read . fromMaybe "3000" <$> lookupEnv "PORT" -- TODO: make 3000 if PORT is not an integer
 
-pgEnv = PostgresEnv { pgHost = "localhost"
-                    , pgPort = "1234"
-                    , pgUser = "oracle"
-                    , pgPassword = "mD361nKg7EwbfJCqeSoP9woNzAEjV"
-                    , pgDBName = "scrabble-oracle-db"
-                    }
-
 smartLookup :: String -> IO (Either String String)
 smartLookup envVar = do
   mEnv <- lookupEnv envVar
@@ -45,4 +38,4 @@ main = do
   ePgEnv <- getPgEnv
   case ePgEnv of
     Left err -> error err
-    Right pgEng -> app port pgEnv
+    Right pgEnv -> app port pgEnv
